@@ -1,11 +1,11 @@
 {
-    "name": "app1",
-    "short_name": "app1",
+    "name": "ClimaCast",
+    "short_name": "ClimaCast",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1A7AD6",
+    "theme_color": "#1A7AD6",
+    "description": "Aplicacion de clima ClimaCast.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

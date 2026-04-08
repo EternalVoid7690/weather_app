@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:clima_en_vivo/features/weather/data/open_weather_service.dart';
 import 'package:clima_en_vivo/features/weather/domain/weather_models.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/open_weather_icon.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherFavoritesView extends StatefulWidget {
   const WeatherFavoritesView({
@@ -22,6 +23,7 @@ class WeatherFavoritesView extends StatefulWidget {
 
 class _WeatherFavoritesViewState extends State<WeatherFavoritesView> {
   static final RegExp _cityInputPattern = RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$');
+  static const String _favoritesStorageKey = 'favorite_cities';
 
   final List<String> _cities = [
     'Ciudad de México',
@@ -36,7 +38,30 @@ class _WeatherFavoritesViewState extends State<WeatherFavoritesView> {
   @override
   void initState() {
     super.initState();
-    _futureFavorites = _loadFavorites();
+    _futureFavorites = _initializeFavorites();
+  }
+
+  Future<List<CurrentWeather>> _initializeFavorites() async {
+    await _loadSavedFavorites();
+    return _loadFavorites();
+  }
+
+  Future<void> _loadSavedFavorites() async {
+    final preferences = await SharedPreferences.getInstance();
+    final storedCities = preferences.getStringList(_favoritesStorageKey);
+
+    if (storedCities == null || storedCities.isEmpty) {
+      return;
+    }
+
+    _cities
+      ..clear()
+      ..addAll(storedCities);
+  }
+
+  Future<void> _saveFavorites() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setStringList(_favoritesStorageKey, _cities);
   }
 
   Future<List<CurrentWeather>> _loadFavorites() {
@@ -88,11 +113,45 @@ class _WeatherFavoritesViewState extends State<WeatherFavoritesView> {
       return;
     }
 
+    final removedIndex = _cities.indexWhere(
+      (savedCity) => savedCity.toLowerCase() == city.toLowerCase(),
+    );
+
+    if (removedIndex < 0) {
+      return;
+    }
+
     setState(() {
-      _cities.removeWhere(
-          (savedCity) => savedCity.toLowerCase() == city.toLowerCase());
+      _cities.removeAt(removedIndex);
       _futureFavorites = _loadFavorites();
     });
+
+    await _saveFavorites();
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Se quitó $city de favoritos.'),
+        action: SnackBarAction(
+          label: 'Deshacer',
+          onPressed: () {
+            if (!mounted) {
+              return;
+            }
+            setState(() {
+              final targetIndex = removedIndex.clamp(0, _cities.length);
+              _cities.insert(targetIndex, city);
+              _futureFavorites = _loadFavorites();
+            });
+            _saveFavorites();
+          },
+        ),
+      ),
+    );
   }
 
   bool _isValidCityInput(String value) {
@@ -184,6 +243,8 @@ class _WeatherFavoritesViewState extends State<WeatherFavoritesView> {
       _cities.add(selected);
       _futureFavorites = _loadFavorites();
     });
+
+    await _saveFavorites();
   }
 
   @override

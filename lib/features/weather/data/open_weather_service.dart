@@ -24,45 +24,57 @@ class OpenWeatherService implements WeatherRepository {
       );
     }
 
-    final currentUri = Uri.parse(
-      '$_baseUrl/weather?q=$city&appid=$_apiKey&units=metric&lang=es',
-    );
+    try {
+      final currentUri = Uri.parse(
+        '$_baseUrl/weather?q=$city&appid=$_apiKey&units=metric&lang=es',
+      );
 
-    final currentResponse = await _client.get(currentUri);
-    if (currentResponse.statusCode != 200) {
-      throw Exception('No se pudo obtener el clima actual de $city');
+      final currentResponse = await _client.get(currentUri);
+      if (currentResponse.statusCode != 200) {
+        throw Exception('No se pudo obtener el clima actual de $city');
+      }
+
+      final currentJson =
+          jsonDecode(currentResponse.body) as Map<String, dynamic>;
+      final current = _parseCurrent(currentJson);
+
+      final forecastUri = Uri.parse(
+        '$_baseUrl/forecast?q=$city&appid=$_apiKey&units=metric&lang=es',
+      );
+      final forecastResponse = await _client.get(forecastUri);
+
+      if (forecastResponse.statusCode != 200) {
+        throw Exception('No se pudo obtener el pronóstico de $city');
+      }
+
+      final forecastJson =
+          jsonDecode(forecastResponse.body) as Map<String, dynamic>;
+      final forecast = _parseForecast(forecastJson);
+
+      final airUri = Uri.parse(
+        '$_baseUrl/air_pollution?lat=${current.lat}&lon=${current.lon}&appid=$_apiKey',
+      );
+      final airResponse = await _client.get(airUri);
+
+      if (airResponse.statusCode != 200) {
+        throw Exception('No se pudo obtener la calidad del aire');
+      }
+
+      final airJson = jsonDecode(airResponse.body) as Map<String, dynamic>;
+      final air = _parseAirQuality(airJson);
+
+      return WeatherDashboard(current: current, forecast: forecast, air: air);
+    } on http.ClientException catch (error) {
+      final message = error.message.toLowerCase();
+      if (message.contains('failed host lookup') ||
+          message.contains('socketexception') ||
+          message.contains('connection')) {
+        throw Exception(
+          'No hay conexión a Internet o no se pudo resolver el servidor. Verifica tu red e inténtalo de nuevo.',
+        );
+      }
+      rethrow;
     }
-
-    final currentJson =
-        jsonDecode(currentResponse.body) as Map<String, dynamic>;
-    final current = _parseCurrent(currentJson);
-
-    final forecastUri = Uri.parse(
-      '$_baseUrl/forecast?q=$city&appid=$_apiKey&units=metric&lang=es',
-    );
-    final forecastResponse = await _client.get(forecastUri);
-
-    if (forecastResponse.statusCode != 200) {
-      throw Exception('No se pudo obtener el pronóstico de $city');
-    }
-
-    final forecastJson =
-        jsonDecode(forecastResponse.body) as Map<String, dynamic>;
-    final forecast = _parseForecast(forecastJson);
-
-    final airUri = Uri.parse(
-      '$_baseUrl/air_pollution?lat=${current.lat}&lon=${current.lon}&appid=$_apiKey',
-    );
-    final airResponse = await _client.get(airUri);
-
-    if (airResponse.statusCode != 200) {
-      throw Exception('No se pudo obtener la calidad del aire');
-    }
-
-    final airJson = jsonDecode(airResponse.body) as Map<String, dynamic>;
-    final air = _parseAirQuality(airJson);
-
-    return WeatherDashboard(current: current, forecast: forecast, air: air);
   }
 
   CurrentWeather _parseCurrent(Map<String, dynamic> json) {

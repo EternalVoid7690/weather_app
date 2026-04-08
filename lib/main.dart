@@ -13,7 +13,7 @@ class ClimaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clima en Vivo',
+      title: 'ClimaCast',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       home: const WeatherHome(),

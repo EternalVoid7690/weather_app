@@ -14,6 +14,9 @@ dependencies:
   # HTTP para OpenWeatherMap
   http: ^1.2.2
 
+  # Persistencia local para favoritos
+  shared_preferences: ^2.5.3
+
   # Iconos estilo iOS
   cupertino_icons: ^1.0.8
 
@@ -21,6 +24,27 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app_icon.png
+  adaptive_icon_background: "#1A7AD6"
+  adaptive_icon_foreground: assets/images/app_icon.png
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/images/app_icon.png
+    background_color: "#1A7AD6"
+    theme_color: "#1A7AD6"
+  windows:
+    generate: true
+    image_path: assets/images/app_icon.png
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: assets/images/app_icon.png
