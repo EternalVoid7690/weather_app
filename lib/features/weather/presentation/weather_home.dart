@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:clima_en_vivo/features/weather/data/open_weather_service.dart';
 import 'package:clima_en_vivo/features/weather/domain/weather_models.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_air_view.dart';
@@ -16,6 +17,7 @@ class WeatherHome extends StatefulWidget {
 }
 
 class _WeatherHomeState extends State<WeatherHome> {
+  static final RegExp _cityInputPattern = RegExp(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]+$');
   late final WeatherRepository _repository;
   late Future<WeatherDashboard> _future;
   int _index = 0;
@@ -34,6 +36,11 @@ class _WeatherHomeState extends State<WeatherHome> {
     });
   }
 
+  bool _isValidCityInput(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty && _cityInputPattern.hasMatch(trimmed);
+  }
+
   Future<void> _changeCity() async {
     final controller = TextEditingController(text: _city);
 
@@ -45,6 +52,11 @@ class _WeatherHomeState extends State<WeatherHome> {
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(labelText: 'Ciudad'),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(
+                RegExp(r'[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]'),
+              ),
+            ],
             textInputAction: TextInputAction.done,
             onSubmitted: (_) =>
                 Navigator.of(context).pop(controller.text.trim()),
@@ -65,6 +77,15 @@ class _WeatherHomeState extends State<WeatherHome> {
     );
 
     if (!mounted || selected == null || selected.isEmpty) {
+      return;
+    }
+
+    if (!_isValidCityInput(selected)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Solo se permiten letras y espacios para la ciudad.'),
+        ),
+      );
       return;
     }
 
