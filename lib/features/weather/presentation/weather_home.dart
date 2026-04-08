@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:clima_en_vivo/features/weather/data/open_weather_service.dart';
 import 'package:clima_en_vivo/features/weather/domain/weather_models.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_air_view.dart';
+import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_favorites_view.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_forecast_view.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_now_view.dart';
+import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_planner_view.dart';
 
 class WeatherHome extends StatefulWidget {
   const WeatherHome({super.key, WeatherRepository? repository})
@@ -33,6 +35,14 @@ class _WeatherHomeState extends State<WeatherHome> {
   void _reload() {
     setState(() {
       _future = _repository.fetchDashboard(_city);
+    });
+  }
+
+  void _selectCityFromFavorites(String city) {
+    setState(() {
+      _city = city;
+      _future = _repository.fetchDashboard(_city);
+      _index = 0;
     });
   }
 
@@ -183,6 +193,12 @@ class _WeatherHomeState extends State<WeatherHome> {
                 WeatherNowView(current: dashboard.current),
                 WeatherForecastView(forecast: dashboard.forecast),
                 WeatherAirView(air: dashboard.air),
+                WeatherFavoritesView(
+                  repository: _repository,
+                  currentCity: _city,
+                  onSelectCity: _selectCityFromFavorites,
+                ),
+                WeatherPlannerView(forecast: dashboard.forecast),
               ],
             );
           },
@@ -203,6 +219,14 @@ class _WeatherHomeState extends State<WeatherHome> {
           NavigationDestination(
             icon: Icon(Icons.air),
             label: 'Aire',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_outline),
+            label: 'Favoritos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_note_outlined),
+            label: 'Plan',
           ),
         ],
       ),

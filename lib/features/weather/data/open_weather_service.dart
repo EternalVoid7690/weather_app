@@ -126,6 +126,9 @@ class OpenWeatherService implements WeatherRepository {
       co: (components['co'] as num).toDouble(),
       no2: (components['no2'] as num).toDouble(),
       o3: (components['o3'] as num).toDouble(),
+      measuredAt: DateTime.fromMillisecondsSinceEpoch(
+        ((item['dt'] as num?)?.toInt() ?? 0) * 1000,
+      ),
     );
   }
 

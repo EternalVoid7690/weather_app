@@ -46,6 +46,7 @@ class AirQuality {
     required this.co,
     required this.no2,
     required this.o3,
+    required this.measuredAt,
   });
 
   final int aqi;
@@ -54,6 +55,7 @@ class AirQuality {
   final double co;
   final double no2;
   final double o3;
+  final DateTime measuredAt;
 }
 
 class WeatherDashboard {
