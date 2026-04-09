@@ -75,8 +75,10 @@ class WeatherPlannerView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
+    final bottomPad = MediaQuery.paddingOf(context).bottom + 74 + 16;
+
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
       children: [
         Text(
           'Planificador semanal',

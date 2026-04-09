@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:clima_en_vivo/core/theme/app_theme.dart';
-import 'package:clima_en_vivo/features/weather/presentation/weather_home.dart';
+import 'package:clima_en_vivo/features/weather/presentation/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +16,7 @@ class ClimaApp extends StatelessWidget {
       title: 'ClimaCast',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const WeatherHome(),
+      home: const SplashScreen(),
     );
   }
 }

@@ -12,8 +12,10 @@ class WeatherNowView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final bottomPad = MediaQuery.paddingOf(context).bottom + 74 + 16;
+
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
       children: [
         Card(
           child: Padding(

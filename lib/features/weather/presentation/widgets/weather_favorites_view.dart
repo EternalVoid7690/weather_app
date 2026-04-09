@@ -27,10 +27,6 @@ class _WeatherFavoritesViewState extends State<WeatherFavoritesView> {
 
   final List<String> _cities = [
     'Ciudad de México',
-    'Guadalajara',
-    'Monterrey',
-    'Mérida',
-    'Puebla',
   ];
 
   late Future<List<CurrentWeather>> _futureFavorites;
@@ -295,8 +291,9 @@ class _WeatherFavoritesViewState extends State<WeatherFavoritesView> {
         }
 
         final cities = snapshot.data ?? const [];
+        final bottomPad = MediaQuery.paddingOf(context).bottom + 74 + 16;
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
           children: [
             Row(
               children: [

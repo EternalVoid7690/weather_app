@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:clima_en_vivo/features/weather/data/open_weather_service.dart';
 import 'package:clima_en_vivo/features/weather/domain/weather_models.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_air_view.dart';
@@ -29,7 +30,48 @@ class _WeatherHomeState extends State<WeatherHome> {
   void initState() {
     super.initState();
     _repository = widget._repository ?? OpenWeatherService();
-    _future = _repository.fetchDashboard(_city);
+    _future = _loadWithLocation();
+  }
+
+  /// Intenta obtener la ciudad del dispositivo vía GPS.
+  /// Si el permiso es denegado o hay error, usa la ciudad por defecto.
+  Future<WeatherDashboard> _loadWithLocation() async {
+    try {
+      final position = await _requestPosition();
+      if (position != null) {
+        final dashboard = await _repository.fetchDashboardByCoords(
+          position.latitude,
+          position.longitude,
+        );
+        if (mounted) {
+          setState(() => _city = dashboard.current.city);
+        }
+        return dashboard;
+      }
+    } catch (_) {
+      // Fallback a ciudad por defecto
+    }
+    return _repository.fetchDashboard(_city);
+  }
+
+  /// Solicita permiso de ubicación y devuelve la posición o null si no se puede.
+  Future<Position?> _requestPosition() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return null;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return null;
+    }
+    if (permission == LocationPermission.deniedForever) return null;
+
+    return Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.low,
+        timeLimit: Duration(seconds: 10),
+      ),
+    );
   }
 
   void _reload() {

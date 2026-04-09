@@ -17,6 +17,9 @@ dependencies:
   # Persistencia local para favoritos
   shared_preferences: ^2.5.3
 
+  # Ubicación GPS del dispositivo
+  geolocator: ^13.0.1
+
   # Iconos estilo iOS
   cupertino_icons: ^1.0.8
 

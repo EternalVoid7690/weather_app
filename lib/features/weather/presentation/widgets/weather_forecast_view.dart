@@ -19,8 +19,10 @@ class WeatherForecastView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPad = MediaQuery.paddingOf(context).bottom + 74 + 16;
+
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPad),
       itemBuilder: (context, index) {
         final item = forecast[index];
         final day = _weekDays[item.date.weekday - 1];

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 abstract class WeatherRepository {
   Future<WeatherDashboard> fetchDashboard(String city);
+  Future<WeatherDashboard> fetchDashboardByCoords(double lat, double lon);
 }
 
 class OpenWeatherService implements WeatherRepository {
@@ -71,6 +72,56 @@ class OpenWeatherService implements WeatherRepository {
           message.contains('connection')) {
         throw Exception(
           'No hay conexión a Internet o no se pudo resolver el servidor. Verifica tu red e inténtalo de nuevo.',
+        );
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<WeatherDashboard> fetchDashboardByCoords(
+      double lat, double lon) async {
+    try {
+      final currentUri = Uri.parse(
+        '$_baseUrl/weather?lat=$lat&lon=$lon&appid=$_apiKey&units=metric&lang=es',
+      );
+      final currentResponse = await _client.get(currentUri);
+      if (currentResponse.statusCode != 200) {
+        throw Exception('No se pudo obtener el clima para tu ubicación');
+      }
+      final currentJson =
+          jsonDecode(currentResponse.body) as Map<String, dynamic>;
+      final current = _parseCurrent(currentJson);
+
+      final forecastUri = Uri.parse(
+        '$_baseUrl/forecast?lat=$lat&lon=$lon&appid=$_apiKey&units=metric&lang=es',
+      );
+      final forecastResponse = await _client.get(forecastUri);
+      if (forecastResponse.statusCode != 200) {
+        throw Exception('No se pudo obtener el pronóstico para tu ubicación');
+      }
+      final forecastJson =
+          jsonDecode(forecastResponse.body) as Map<String, dynamic>;
+      final forecast = _parseForecast(forecastJson);
+
+      final airUri = Uri.parse(
+        '$_baseUrl/air_pollution?lat=${current.lat}&lon=${current.lon}&appid=$_apiKey',
+      );
+      final airResponse = await _client.get(airUri);
+      if (airResponse.statusCode != 200) {
+        throw Exception('No se pudo obtener la calidad del aire');
+      }
+      final airJson = jsonDecode(airResponse.body) as Map<String, dynamic>;
+      final air = _parseAirQuality(airJson);
+
+      return WeatherDashboard(current: current, forecast: forecast, air: air);
+    } on http.ClientException catch (error) {
+      final message = error.message.toLowerCase();
+      if (message.contains('failed host lookup') ||
+          message.contains('socketexception') ||
+          message.contains('connection')) {
+        throw Exception(
+          'No hay conexión a Internet. Verifica tu red e inténtalo de nuevo.',
         );
       }
       rethrow;
