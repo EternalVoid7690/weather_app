@@ -6,6 +6,7 @@ import 'package:clima_en_vivo/features/weather/domain/weather_models.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_air_view.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_favorites_view.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_forecast_view.dart';
+import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_game_view.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_now_view.dart';
 import 'package:clima_en_vivo/features/weather/presentation/widgets/weather_planner_view.dart';
 
@@ -241,36 +242,60 @@ class _WeatherHomeState extends State<WeatherHome> {
                   onSelectCity: _selectCityFromFavorites,
                 ),
                 WeatherPlannerView(forecast: dashboard.forecast),
+                WeatherGameView(
+                  current: dashboard.current,
+                  forecast: dashboard.forecast,
+                ),
               ],
             );
           },
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.sunny),
-            label: 'Hoy',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calendar_view_week_outlined),
-            label: 'Pronóstico',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.air),
-            label: 'Aire',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_outline),
-            label: 'Favoritos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.event_note_outlined),
-            label: 'Plan',
-          ),
-        ],
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          height: 72,
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            return TextStyle(
+              fontSize: states.contains(WidgetState.selected) ? 10 : 9,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+            );
+          }),
+        ),
+        child: NavigationBar(
+          selectedIndex: _index,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          onDestinationSelected: (value) => setState(() => _index = value),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.sunny),
+              label: 'Hoy',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.calendar_view_week_outlined),
+              label: 'Pronóstico',
+              tooltip: 'Pronóstico',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.air),
+              label: 'Aire',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.favorite_outline),
+              label: 'Favoritos',
+              tooltip: 'Favoritos',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.event_note_outlined),
+              label: 'Plan',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.videogame_asset_outlined),
+              label: 'Juego',
+            ),
+          ],
+        ),
       ),
     );
   }
